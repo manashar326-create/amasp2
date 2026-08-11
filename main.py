@@ -76,41 +76,31 @@ def clear_notified():
 	except FileNotFoundError:
 		pass
 
-
 def main():
-	if not PRODUCT_URL:
-		print("PRODUCT_URL が設定されていません。 .env を設定してください。")
-		return
+    if not PRODUCT_URL:
+        print("PRODUCT_URL が設定されていません。")
+        return
 
-	print("監視開始:", PRODUCT_URL)
-	was_notified = load_notified()
+    print("監視チェック開始:", PRODUCT_URL)
+    was_notified = load_notified()
 
-	while True:
-		try:
-			in_stock = check_stock(PRODUCT_URL)
-			print(time.strftime("%Y-%m-%d %H:%M:%S"), "在庫:", in_stock)
+    try:
+        in_stock = check_stock(PRODUCT_URL)
+        print(time.strftime("%Y-%m-%d %H:%M:%S"), "在庫:", in_stock)
 
-			if in_stock and not was_notified:
-				subject = "商品が入荷しました"
-				body = f"商品が入荷しました: {PRODUCT_URL}"
-				if SMTP_SERVER and FROM_EMAIL and TO_EMAIL:
-					send_email(subject, body)
-					print("通知メールを送信しました。")
-				else:
-					print("メール設定が不完全です。メールは送信されませんでした。")
-				save_notified()
-				was_notified = True
+        if in_stock and not was_notified:
+            subject = "商品が入荷しました"
+            body = f"商品が入荷しました: {PRODUCT_URL}"
+            if SMTP_SERVER and FROM_EMAIL and TO_EMAIL:
+                send_email(subject, body)
+                print("通知メールを送信しました。")
+            save_notified()
 
-			if not in_stock and was_notified:
-				# 在庫が無くなったらフラグをクリアして再通知を許可
-				clear_notified()
-				was_notified = False
+        if not in_stock and was_notified:
+            clear_notified()
 
-		except Exception as e:
-			print("エラー発生:", e)
-
-		time.sleep(CHECK_INTERVAL)
-
+    except Exception as e:
+        print("エラー発生:", e)
 
 if __name__ == "__main__":
-	main()
+    main()
