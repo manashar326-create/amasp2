@@ -6,6 +6,10 @@ import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
+import sys
+
+# ログ出力をリアルタイム（バッファリングなし）にする設定
+sys.stdout.reconfigure(line_buffering=True)
 
 load_dotenv()
 
