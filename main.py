@@ -13,7 +13,7 @@ PRODUCT_URL = os.getenv("PRODUCT_URL")
 CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "300"))
 IN_STOCK_KEYWORDS = [k.strip().lower() for k in os.getenv("IN_STOCK_KEYWORDS", "在庫あり,In Stock,Add to Cart,カートに入れる").split(",")]
 OUT_OF_STOCK_KEYWORDS = [k.strip().lower() for k in os.getenv("OUT_OF_STOCK_KEYWORDS", "現在お取り扱いできません,一時的に在庫切れ,Currently unavailable,Out of Stock,在庫切れ").split(",")]
-
+ 
 SMTP_SERVER = os.getenv("SMTP_SERVER")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER")
