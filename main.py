@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 PRODUCT_URL = os.getenv("PRODUCT_URL")
-CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "300"))
+CHECK_INTERVAL = 180
 IN_STOCK_KEYWORDS = [k.strip().lower() for k in os.getenv("IN_STOCK_KEYWORDS", "在庫あり,In Stock,Add to Cart,カートに入れる").split(",")]
 OUT_OF_STOCK_KEYWORDS = [k.strip().lower() for k in os.getenv("OUT_OF_STOCK_KEYWORDS", "現在お取り扱いできません,一時的に在庫切れ,Currently unavailable,Out of Stock,在庫切れ").split(",")]
  
@@ -85,25 +85,34 @@ def main():
         return
 
     print("監視チェック開始:", PRODUCT_URL)
-    was_notified = load_notified()
 
     try:
-        in_stock = check_stock(PRODUCT_URL)
-        print(time.strftime("%Y-%m-%d %H:%M:%S"), "在庫:", in_stock)
+        while True:
+            was_notified = load_notified()
 
-        if in_stock and not was_notified:
-            subject = "商品が入荷しました"
-            body = f"商品が入荷しました: {PRODUCT_URL}"
-            if SMTP_SERVER and FROM_EMAIL and TO_EMAIL:
-                send_email(subject, body)
-                print("通知メールを送信しました。")
-            save_notified()
+            try:
+                in_stock = check_stock(PRODUCT_URL)
+                print(time.strftime("%Y-%m-%d %H:%M:%S"), "在庫:", in_stock)
 
-        if not in_stock and was_notified:
-            clear_notified()
+                if in_stock and not was_notified:
+                    subject = "商品が入荷しました"
+                    body = f"商品が入荷しました: {PRODUCT_URL}"
+                    if SMTP_SERVER and FROM_EMAIL and TO_EMAIL:
+                        send_email(subject, body)
+                        print("通知メールを送信しました。")
+                    save_notified()
 
-    except Exception as e:
-        print("エラー発生:", e)
+                if not in_stock and was_notified:
+                    clear_notified()
+
+            except Exception as e:
+                print("エラー発生:", e)
+
+            print(f"次回チェックまで {CHECK_INTERVAL} 秒待機します。")
+            time.sleep(CHECK_INTERVAL)
+
+    except KeyboardInterrupt:
+        print("監視を停止しました。")
 
 if __name__ == "__main__":
     main()
