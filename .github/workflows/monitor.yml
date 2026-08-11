@@ -1,0 +1,44 @@
+name: Amazon Stock Monitor
+
+on:
+  schedule:
+    # 5分ごとに自動実行する設定（Cron）
+    - cron: '*/5 * * * *'
+  # GitHubの画面から手動で実行できるようにする設定
+  workflow_dispatch:
+
+jobs:
+  check-stock:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. リポジトリのコードを取得
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Python 環境のセットアップ
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 3. 必要なライブラリのインストール
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 python-dotenv
+
+      # 4. GitHub Secrets から環境変数を読み込んで main.py を実行
+      - name: Run script
+        env:
+          PRODUCT_URL: ${{ secrets.PRODUCT_URL }}
+          CHECK_INTERVAL: ${{ secrets.CHECK_INTERVAL }}
+          IN_STOCK_KEYWORDS: ${{ secrets.IN_STOCK_KEYWORDS }}
+          OUT_OF_STOCK_KEYWORDS: ${{ secrets.OUT_OF_STOCK_KEYWORDS }}
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+          TO_EMAIL: ${{ secrets.TO_EMAIL }}
+          USER_AGENT: ${{ secrets.USER_AGENT }}
+        run: python main.py
